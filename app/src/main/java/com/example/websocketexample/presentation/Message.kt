@@ -1,4 +1,4 @@
-package com.example.websocketexample
+package com.example.websocketexample.presentation
 
 data class Message(
     val message: String,

@@ -1,7 +1,8 @@
-package com.example.websocketexample
+package com.example.websocketexample.presentation
 
 import androidx.recyclerview.widget.RecyclerView
 import com.example.websocketexample.databinding.ItemMessageBinding
+import com.example.websocketexample.presentation.Message
 
 class MessageViewHolder(private val binding: ItemMessageBinding) :
     RecyclerView.ViewHolder(binding.root) {
