@@ -2,17 +2,13 @@ package com.example.websocketexample.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.websocketexample.data.remote.ChatWebSocketClient
 import com.example.websocketexample.data.Repository
-import com.example.websocketexample.data.remote.WebSocketEvent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.example.websocketexample.data.remote.ChatWebSocketClient
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -28,14 +24,16 @@ class ChatViewModel : ViewModel() {
     private val repository: Repository = Repository(webSocketClient)
     private val chatMapper = ChatMapper()
 
-    val state: StateFlow<ScreenUiState> = repository.observeWebSocketEvents()
+    val state: Flow<ScreenUiState> = repository.observeWebSocketEvents()
         .map { webSocketEvent ->
             chatMapper.toUiEvent(webSocketEvent)
         }
-        .stateIn(
+        .onStart {
+            emit(ScreenUiState.Loading)
+        }
+        .shareIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ScreenUiState.Loading
         )
 
     fun setUpWebSocketConnection() {

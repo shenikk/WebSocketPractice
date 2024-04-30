@@ -15,21 +15,20 @@ class ChatWebSocketClient(
 
     private var webSocket: WebSocket? = null
 
-    // TODO точно ли нужен sharedFlow
-    private val sharedFlow = MutableSharedFlow<WebSocketEvent>()
+    private val flow = MutableSharedFlow<WebSocketEvent>()
     private val scope = CoroutineScope(EmptyCoroutineContext)
 
     suspend fun setupWebSocketService() {
         webSocket = client.newWebSocket(request, SocketListener(
             payload = { event ->
                 scope.launch {
-                    sharedFlow.emit(event)
+                    flow.emit(event)
                 }
             }
         ))
     }
 
-    fun observe() = sharedFlow
+    fun observe() = flow
 
     fun sendMessage(message: String) {
         webSocket?.send(message)
