@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,18 +47,26 @@ class MainActivity : AppCompatActivity() {
 
 //        repeatOnLifecycle vs flowWithLifecycle
         //https://bladecoder.medium.com/kotlins-flow-in-viewmodels-it-s-complicated-556b472e281a
-//        this.lifecycleScope.launch {
-//            viewModel.state.flowWithLifecycle(viewLifecycleOwner.l) { data ->
+//        Not correct
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.state.collect { data ->
 //                displayResult(data)
 //            }
 //        }
 
-        this.lifecycleScope.launch {
-            viewModel.state
-                .collect { data ->
+//        Correct!
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { data ->
                     displayResult(data)
                 }
+            }
         }
+
+//        liveDataExample
+//        viewModel.state.observe(this) { data ->
+//            displayResult(data)
+//        }
     }
 
     private fun displayResult(data: ScreenUiState) {

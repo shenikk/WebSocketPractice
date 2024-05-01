@@ -7,7 +7,6 @@ import com.example.websocketexample.data.remote.ChatWebSocketClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -28,13 +27,17 @@ class ChatViewModel : ViewModel() {
         .map { webSocketEvent ->
             chatMapper.toUiEvent(webSocketEvent)
         }
-        .onStart {
-            emit(ScreenUiState.Loading)
-        }
         .shareIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
         )
+
+//        liveDataExample
+//    val state: LiveData<ScreenUiState> = repository.observeWebSocketEvents()
+//        .map { webSocketEvent ->
+//            chatMapper.toUiEvent(webSocketEvent)
+//        }
+//        .asLiveData()
 
     fun setUpWebSocketConnection() {
         viewModelScope.launch {
