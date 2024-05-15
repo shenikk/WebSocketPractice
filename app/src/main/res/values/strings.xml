@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WebsocketExample</string>
+    <string name="add_chat">Новый чат</string>
 </resources>

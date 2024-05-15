@@ -1,96 +1,28 @@
 package com.example.websocketexample.presentation
 
 import android.os.Bundle
-import android.view.View
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.websocketexample.databinding.ActivityMainBinding
-import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.ui.Modifier
+import com.example.websocketexample.presentation.screen.Navigation
+import com.example.websocketexample.presentation.ui.theme.ComposeAppTheme
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var adapter: ChatMessageAdapter
-    private lateinit var viewModel: ChatViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
 
-        setUpViewModel()
-        setupRecyclerViewMessage()
-        setUpEditTextView()
-    }
-
-    private fun setupRecyclerViewMessage() {
-        adapter = ChatMessageAdapter()
-        binding.recyclerMessage.apply {
-            adapter = this@MainActivity.adapter
-            itemAnimator = DefaultItemAnimator()
-            layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
-        }
-    }
-
-    private fun setUpViewModel() {
-        viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
-        viewModel.setUpWebSocketConnection()
-
-
-//        repeatOnLifecycle vs flowWithLifecycle
-        //https://bladecoder.medium.com/kotlins-flow-in-viewmodels-it-s-complicated-556b472e281a
-//        this.lifecycleScope.launch {
-//            viewModel.state.flowWithLifecycle(viewLifecycleOwner.l) { data ->
-//                displayResult(data)
-//            }
-//        }
-
-        this.lifecycleScope.launch {
-            viewModel.state
-                .collect { data ->
-                    displayResult(data)
+        setContent {
+            ComposeAppTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    Navigation()
                 }
-        }
-    }
-
-    private fun displayResult(data: ScreenUiState) {
-        when (data) {
-            is ScreenUiState.Loading -> {
-                println(" EchoWebSocketListener Loading")
-                binding.loader.visibility = View.VISIBLE
-            }
-
-            is ScreenUiState.Error -> {
-                println(" EchoWebSocketListener error")
-                binding.loader.visibility = View.GONE
-            }
-
-            is ScreenUiState.Ready -> {
-                data.message?.let { message ->
-                    adapter.addItem(Message(message = message, isFromSender = false))
-                }
-                binding.loader.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun setUpEditTextView() {
-        binding.etMessage.doAfterTextChanged {
-            setupButtonSend(it.toString())
-        }
-    }
-
-    private fun setupButtonSend(message: String) {
-        binding.btnSend.isEnabled = message.isNotBlank()
-        binding.btnSend.setOnClickListener {
-            viewModel.sendMessage(message) {
-                adapter.addItem(Message(message = message, isFromSender = true))
             }
         }
     }
